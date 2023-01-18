@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+    </PropertyGroup>
+    <ItemGroup>
+        <Using Include="BookingMobile" />
+        <Using Include="ServiceStack" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Markdig" Version="0.30.3" />
+        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="6.0.0" />
+        <PackageReference Include="Microsoft.AspNetCore.DataProtection" Version="6.0.9" />
+        <PackageReference Include="ServiceStack" Version="6.*" />
+        <PackageReference Include="ServiceStack.Blazor" Version="6.*" />
+        <PackageReference Include="ServiceStack.OrmLite.Sqlite.Data" Version="6.*" />
+        <PackageReference Include="ServiceStack.Server" Version="6.*" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\BookingMobile.ServiceInterface\BookingMobile.ServiceInterface.csproj" />
+        <ProjectReference Include="..\BookingMobile.ServiceModel\BookingMobile.ServiceModel.csproj" />
+    </ItemGroup>
+
+    <Target Name="CreateAppDataFolderBuild" AfterTargets="AfterBuild">
+      <MakeDir Directories="$(BuildDir)App_Data" Condition="!Exists('$(BuildDir)App_Data')" />
+    </Target>
+     
+    <Target Name="CreateAppDataFolder" AfterTargets="AfterPublish">
+        <MakeDir Directories="$(PublishDir)App_Data" Condition="!Exists('$(PublishDir)App_Data')" />
+    </Target>
+
+    <PropertyGroup>
+        <ClientDir>$(MSBuildProjectDirectory)/../BookingMobile.Client</ClientDir>
+        <WwwRoot>$(ClientDir)/wwwroot</WwwRoot>
+        <TestsDir>$(MSBuildProjectDirectory)/../BookingMobile.Tests</TestsDir>
+    </PropertyGroup>
+</Project>
