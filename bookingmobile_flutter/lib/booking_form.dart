@@ -1,14 +1,19 @@
+import 'dart:async';
+
 import 'package:bookingmobile_flutter/dtos.dart';
 import 'package:bookingmobile_flutter/main.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:reactive_forms/reactive_forms.dart';
+import 'package:servicestack/client.dart';
 
 class BookingForm extends StatefulWidget {
-  const BookingForm({super.key});
+  const BookingForm({super.key, this.booking});
+
+  final Booking? booking;
 
   @override
-  State<StatefulWidget> createState() => BookingFormState();
+  State<StatefulWidget> createState() => BookingFormState(booking: booking);
 }
 
 class BookingFormState extends State<BookingForm> {
@@ -21,14 +26,39 @@ class BookingFormState extends State<BookingForm> {
     'bookingEndDate': FormControl<DateTime>()
   });
 
+  BookingFormState({this.booking});
+
+  final Booking? booking;
+
   var startDateController = TextEditingController();
   var endDateController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    if (booking != null) {
+      form.control('name').value = booking?.name;
+      form.control('roomType').value = booking?.roomType;
+      form.control('roomNumber').value = booking?.roomNumber;
+      form.control('cost').value = booking?.cost;
+      form.control('bookingStartDate').value = booking?.bookingStartDate;
+      form.control('bookingEndDate').value = booking?.bookingEndDate;
+      if (booking?.bookingStartDate != null) {
+        startDateController.text =
+            DateFormat('yyyy-MM-dd').format(booking!.bookingStartDate!);
+      }
+      if (booking?.bookingEndDate != null) {
+        endDateController.text =
+            DateFormat('yyyy-MM-dd').format(booking!.bookingEndDate!);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Create new Booking'),
+        title: Text(booking == null ? 'Create new Booking' : 'Update Booking'),
       ),
       body: ReactiveFormBuilder(
         form: () => form,
@@ -40,6 +70,9 @@ class BookingFormState extends State<BookingForm> {
                 padding: const EdgeInsets.all(8.0),
                 child: ReactiveTextField(
                   formControlName: 'name',
+                    validationMessages: {
+                      'required': (error) => 'The name must not be empty'
+                    },
                   decoration: const InputDecoration(
                       label: Text.rich(TextSpan(children: <InlineSpan>[
                     WidgetSpan(child: Text('Name'))
@@ -61,8 +94,8 @@ class BookingFormState extends State<BookingForm> {
                 child: ReactiveTextField(
                     keyboardType: TextInputType.number,
                     formControlName: 'roomNumber',
-                    decoration: const InputDecoration(
-                        label: Text.rich(TextSpan(children: <InlineSpan>[
+                    decoration: InputDecoration(
+                        label: const Text.rich(TextSpan(children: <InlineSpan>[
                       WidgetSpan(child: Text('Room Number'))
                     ])))),
               ),
@@ -159,39 +192,73 @@ class BookingFormState extends State<BookingForm> {
                   return Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: TextButton(
-                      child: const Text(
-                        'Create Booking',
-                        style: TextStyle(fontSize: 20),
+                      child: Text(
+                        (booking == null ? 'Create Booking' : 'Save Booking'),
+                        style: const TextStyle(fontSize: 20),
                       ),
-                      onPressed: () async {
+                      onPressed: () {
                         if (form.valid) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                  content: Text("Creating booking")));
-
-                          BookingMobile.getClient()
-                              .post(CreateBooking(
-                                  bookingStartDate:
-                                      form.control('bookingStartDate').value,
-                                  bookingEndDate:
-                                      form.control('bookingEndDate').value,
-                                  cost: form.control('cost').value,
-                                  name: form.control('name').value,
-                                  roomNumber: form.control('roomNumber').value,
-                                  roomType: form.control('roomType').value))
-                              .then((value) => {Navigator.pop(context)})
-                              .catchError((e) => {debugPrint(e.message)});
+                          createOrUpdateBooking()
+                              .then((val) => {
+                            setState(() => {
+                              responseStatus = null
+                            }),
+                            Navigator.pop(context)
+                          })
+                              .catchError((error) => {
+                                setState(() => {
+                                  responseStatus = error.responseStatus
+                                })
+                          });
                         }
                       },
                     ),
                   );
                 },
-              )
+              ),
+              Text(responseStatus != null ? 'Error: ${responseStatus?.message}' : '',
+              style: const TextStyle(fontSize: 20,color: Colors.red))
             ],
           ));
         },
       ),
     );
+  }
+
+  ResponseStatus? responseStatus;
+
+  String? resolveFieldErrorText(String fieldName) {
+    if(responseStatus == null) {
+      return "";
+    }
+    if(responseStatus?.errors?.where((element) => element.fieldName == fieldName) == null) {
+      return "";
+    }
+    if(responseStatus!.errors!.where((element) => element.fieldName == fieldName).isNotEmpty) {
+      return "";
+    }
+    return responseStatus?.errors?.where((element) => element.fieldName == fieldName).first.message;
+  }
+
+  Future<IdResponse> createOrUpdateBooking() {
+    if (booking == null) {
+      return BookingMobile.getClient().post(CreateBooking(
+          bookingStartDate: form.control('bookingStartDate').value,
+          bookingEndDate: form.control('bookingEndDate').value,
+          cost: form.control('cost').value,
+          name: form.control('name').value,
+          roomNumber: form.control('roomNumber').value,
+          roomType: form.control('roomType').value));
+    } else {
+      return BookingMobile.getClient().put(UpdateBooking(
+          id: booking?.id,
+          bookingStartDate: form.control('bookingStartDate').value,
+          bookingEndDate: form.control('bookingEndDate').value,
+          cost: form.control('cost').value,
+          name: form.control('name').value,
+          roomNumber: form.control('roomNumber').value,
+          roomType: form.control('roomType').value));
+    }
   }
 
   List<DropdownMenuItem> createDropDowns() {
