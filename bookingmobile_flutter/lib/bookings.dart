@@ -58,7 +58,7 @@ class BookingsPageState extends State<BookingsPage> {
   }
 
   List<Booking> bookings = <Booking>[];
-  final int smallSizeWidth = 768;
+  final int smallSizeWidth = 820;
 
   Widget createTable() {
     var width = MediaQuery.of(context).size.width;
