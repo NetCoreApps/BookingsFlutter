@@ -18,17 +18,18 @@ class BookingForm extends StatefulWidget {
 
 class BookingFormState extends State<BookingForm> {
   final form = FormGroup({
-    'name': FormControl<String>(),
-    'roomType': FormControl<RoomType>(),
-    'roomNumber': FormControl<int>(),
-    'cost': FormControl<double>(),
-    'bookingStartDate': FormControl<DateTime>(),
+    'name': FormControl<String>(validators: [Validators.required]),
+    'roomType': FormControl<RoomType>(validators: [Validators.required]),
+    'roomNumber': FormControl<int>(validators: [Validators.required]),
+    'cost': FormControl<double>(validators: [Validators.required]),
+    'bookingStartDate': FormControl<DateTime>(validators: [Validators.required]),
     'bookingEndDate': FormControl<DateTime>()
   });
 
   BookingFormState({this.booking});
 
   final Booking? booking;
+  ResponseStatus? responseStatus;
 
   var startDateController = TextEditingController();
   var endDateController = TextEditingController();
@@ -225,20 +226,7 @@ class BookingFormState extends State<BookingForm> {
     );
   }
 
-  ResponseStatus? responseStatus;
 
-  String? resolveFieldErrorText(String fieldName) {
-    if(responseStatus == null) {
-      return "";
-    }
-    if(responseStatus?.errors?.where((element) => element.fieldName == fieldName) == null) {
-      return "";
-    }
-    if(responseStatus!.errors!.where((element) => element.fieldName == fieldName).isNotEmpty) {
-      return "";
-    }
-    return responseStatus?.errors?.where((element) => element.fieldName == fieldName).first.message;
-  }
 
   Future<IdResponse> createOrUpdateBooking() {
     if (booking == null) {
