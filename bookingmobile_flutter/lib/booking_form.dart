@@ -1,13 +1,11 @@
 import 'package:bookingmobile_flutter/dtos.dart';
 import 'package:bookingmobile_flutter/main.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:reactive_forms/reactive_forms.dart';
-import 'package:servicestack/client.dart';
 
 class BookingForm extends StatefulWidget {
-  BookingForm({super.key});
+  const BookingForm({super.key});
 
   @override
   State<StatefulWidget> createState() => BookingFormState();
@@ -35,9 +33,8 @@ class BookingFormState extends State<BookingForm> {
       body: ReactiveFormBuilder(
         form: () => form,
         builder: (context, form, child) {
-          return Container(
-              child: SingleChildScrollView(
-                  child: Column(
+          return SingleChildScrollView(
+              child: Column(
             children: [
               Padding(
                 padding: const EdgeInsets.all(8.0),
@@ -162,7 +159,6 @@ class BookingFormState extends State<BookingForm> {
                   return Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: TextButton(
-
                       child: const Text(
                         'Create Booking',
                         style: TextStyle(fontSize: 20),
@@ -173,23 +169,18 @@ class BookingFormState extends State<BookingForm> {
                               const SnackBar(
                                   content: Text("Creating booking")));
 
-                          try {
-                            BookingMobile.getClient()
-                                .post(CreateBooking(
-                                    bookingStartDate:
-                                        form.control('bookingStartDate').value,
-                                    bookingEndDate:
-                                        form.control('bookingEndDate').value,
-                                    cost: form.control('cost').value,
-                                    name: form.control('name').value,
-                                    roomNumber:
-                                        form.control('roomNumber').value,
-                                    roomType: form.control('roomType').value))
-                                .then((value) => {Navigator.pop(context)})
-                                .catchError((e) => {debugPrint(e.message)});
-                          } catch (e) {
-                            debugPrint(e.toString());
-                          }
+                          BookingMobile.getClient()
+                              .post(CreateBooking(
+                                  bookingStartDate:
+                                      form.control('bookingStartDate').value,
+                                  bookingEndDate:
+                                      form.control('bookingEndDate').value,
+                                  cost: form.control('cost').value,
+                                  name: form.control('name').value,
+                                  roomNumber: form.control('roomNumber').value,
+                                  roomType: form.control('roomType').value))
+                              .then((value) => {Navigator.pop(context)})
+                              .catchError((e) => {debugPrint(e.message)});
                         }
                       },
                     ),
@@ -197,7 +188,7 @@ class BookingFormState extends State<BookingForm> {
                 },
               )
             ],
-          )));
+          ));
         },
       ),
     );

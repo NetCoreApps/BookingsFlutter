@@ -24,6 +24,8 @@ class BookingsPage extends StatefulWidget {
   State<StatefulWidget> createState() => BookingsPageState();
 }
 
+bool isSmall = false;
+
 class BookingsPageState extends State<BookingsPage> {
   //State for this widget
 
@@ -34,8 +36,6 @@ class BookingsPageState extends State<BookingsPage> {
       refreshBookings();
     });
   }
-
-
 
   Future<QueryResponse<Booking>> queryBookings() {
     return BookingMobile.getClient().get(QueryBookings());
@@ -57,83 +57,79 @@ class BookingsPageState extends State<BookingsPage> {
     return BookingMobile.getClient().delete(DeleteBooking(id: item.id));
   }
 
-  // Future<Todo> createTodo(String text) {
-  //   return BookingMobile.getClient().post(CreateTodo(
-  //       text: text
-  //   ));
-  // }
-
   List<Booking> bookings = <Booking>[];
 
   Widget createTable() {
+    var width = MediaQuery.of(context).size.width;
+
+    isSmall = width < 500;
     List<TableRow> rows = [];
     // Heading
-    rows.add(const TableRow(
-      children: [
-        Text('Name', textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold)),
-        Text('Room Type', textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold)),
-        Text('Room Number', textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold)),
-        Text('Cost', textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold)),
-        Text('Start', textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold)),
-        //Text('End', textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold)),
-      ]
-    ));
+    rows.add(createTableHeading());
     for (int i = 0; i < bookings.length; i++) {
       rows.add(TableRow(children: <Widget>[
-        // TableCell(
-        //   child: Padding(
-        //     padding: const EdgeInsets.all(8.0),
-        //     child: Text(bookings[i].id.toString()),
-        //   ),
-        // ),
-        TableCell(
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text(bookings[i].name.toString()),
-          ),
-        ),
-        TableCell(
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text(bookings[i].roomType.toString().split('.').last),
-          ),
-        ),
-        TableCell(
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text(bookings[i].roomNumber.toString()),
-          ),
-        ),
-        TableCell(
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text(bookings[i].cost.toString()),
-          ),
-        ),
-        TableCell(
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text(bookings[i].bookingStartDate == null
-                ? ''
-                : DateFormat('MMM dd')
-                    .format(bookings[i].bookingStartDate!)),
-          ),
-        ),
-        // TableCell(
-        //   child: Padding(
-        //     padding: const EdgeInsets.all(8.0),
-        //     child: Text(bookings[i].bookingEndDate == null
-        //         ? ''
-        //         : DateFormat('yyyy-MM-dd').format(bookings[i].bookingEndDate!)),
-        //   ),
-        // ),
+        createTableDataCell(bookings[i].name.toString()),
+        createTableDataCell(bookings[i].roomType.toString().split('.').last),
+        createTableDataCell(bookings[i].roomNumber.toString()),
+        createTableDataCell(bookings[i].cost.toString()),
+        createTableDataCell(bookings[i].bookingStartDate == null
+            ? ''
+            : DateFormat('MMM dd').format(bookings[i].bookingStartDate!)),
+        if (!isSmall)
+          createTableDataCell(bookings[i].bookingEndDate == null
+              ? ''
+              : DateFormat('yyyy-MM-dd')
+              .format(bookings[i].bookingEndDate!)),
       ]));
     }
     return Padding(
       padding: const EdgeInsets.all(16.0),
-      child:
-          Table(children: rows, border: TableBorder.symmetric(inside: const BorderSide(width: 2, color: Colors.blue))),
+      child: NotificationListener(
+        onNotification: (SizeChangedLayoutNotification notification) {
+          var width = MediaQuery.of(context).size.width;
+          isSmall = width < 300;
+          return true;
+        },
+        child: Table(
+            children: rows,
+            border: TableBorder.symmetric(
+                inside: const BorderSide(width: 1, color: Colors.grey))),
+      ),
     );
+  }
+
+  TableCell createTableDataCell(String value) {
+    return TableCell(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Text(value),
+      ),
+    );
+  }
+
+  TableRow createTableHeading() {
+    var headings = <Widget>[];
+    headings.add(const Text('Name',
+        textAlign: TextAlign.center,
+        style: TextStyle(fontWeight: FontWeight.bold)));
+    headings.add(Text((isSmall ? 'Type' : 'Room Type'),
+        textAlign: TextAlign.center,
+        style: const TextStyle(fontWeight: FontWeight.bold)));
+    headings.add(Text((isSmall ? 'No' : 'Room Number'),
+        textAlign: TextAlign.center,
+        style: const TextStyle(fontWeight: FontWeight.bold)));
+    headings.add(const Text('Cost',
+        textAlign: TextAlign.center,
+        style: TextStyle(fontWeight: FontWeight.bold)));
+    headings.add(const Text('Start',
+        textAlign: TextAlign.center,
+        style: TextStyle(fontWeight: FontWeight.bold)));
+    if (!isSmall) {
+      headings.add(const Text('End',
+          textAlign: TextAlign.center,
+          style: TextStyle(fontWeight: FontWeight.bold)));
+    }
+    return TableRow(children: headings);
   }
 
   @override
@@ -148,13 +144,12 @@ class BookingsPageState extends State<BookingsPage> {
         children: [createTable()],
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'createbooking',
         onPressed: () => {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => BookingForm()),
-          ).then((value) => {
-            refreshBookings()
-          })
+          ).then((value) => {refreshBookings()})
         },
         tooltip: 'Increment',
         child: const Icon(Icons.add),

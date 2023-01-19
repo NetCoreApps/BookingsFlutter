@@ -71,7 +71,7 @@ class BookingMobile extends StatelessWidget {
               Tab(icon: Icon(Icons.hotel))
             ])),
             body: const TabBarView(children: [
-              HelloFlutter(title: "Hello ServiceStack!"),
+              HelloFlutter(title: "Home"),
               TodoPage(title: "Todo Application"),
               BookingsPage(title: "Bookings"),
             ]),
@@ -175,7 +175,6 @@ class HelloFlutterState extends State<HelloFlutter> {
                       child: Text(
                         'Result: $result',
                         style: const TextStyle(
-                            fontStyle: FontStyle.italic,
                             fontSize: 18
                         ),
                       ),
@@ -185,7 +184,7 @@ class HelloFlutterState extends State<HelloFlutter> {
                 Row(
                   children: [
                     const Padding(
-                      padding: EdgeInsets.only(top: 30),
+                      padding: EdgeInsets.only(top: 30, left: 8),
                       child: Text(
                         'You have pushed the button this many times:',
                       ),

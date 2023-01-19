@@ -99,19 +99,20 @@ class TodoPageState extends State<TodoPage> {
                   itemCount: todos.length,
                   itemBuilder: (BuildContext context, int index) {
                     return CheckboxListTile(
+                      dense: false,
+                        secondary: IconButton(
+                            alignment: Alignment.centerRight,
+                            onPressed: () => {
+                              deleteTodo(todos[index])
+                                  .then((val) => {refreshTodos()})
+                            },
+                            icon: const Icon(Icons.delete)),
                         title: Row(
                           children: [
                             Text(
                               todos[index].text ?? "",
                               style: const TextStyle(fontSize: 18),
                             ),
-                            IconButton(
-                              alignment: Alignment.centerRight,
-                                onPressed: () => {
-                                      deleteTodo(todos[index])
-                                          .then((val) => {refreshTodos()})
-                                    },
-                                icon: const Icon(Icons.delete))
                           ],
                         ),
                         value: todos[index].isFinished ?? false,
