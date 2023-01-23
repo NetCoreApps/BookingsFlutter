@@ -1,7 +1,7 @@
 import 'package:bookingmobile_flutter/todo.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-import 'package:servicestack/client.dart';
+import 'package:flutter/material.dart';
+import 'package:servicestack/web_client.dart' if (dart.library.io) 'package:servicestack/client.dart';
 import 'dart:io';
 
 import 'bookings.dart';
@@ -9,10 +9,10 @@ import 'dtos.dart';
 
 var baseUrl = "https://localhost:5001";
 
-JsonServiceClient client = JsonServiceClient(baseUrl);
+var client = ClientFactory.create(baseUrl);
 
 void main() {
-  if (!kReleaseMode) {
+  if (!kReleaseMode && !kIsWeb) {
     HttpOverrides.global = MyHttpOverrides();
     if (Platform.isAndroid) {
       baseUrl = "https://10.0.2.2:5001";
@@ -23,7 +23,7 @@ void main() {
     }
   }
 
-  client = JsonServiceClient(baseUrl);
+  client = ClientFactory.create(baseUrl);
   client.post(Authenticate(
     provider: 'credentials',
     userName: 'admin@email.com',
@@ -36,7 +36,7 @@ void main() {
 class BookingMobile extends StatelessWidget {
   const BookingMobile({super.key});
 
-  static JsonServiceClient getClient() {
+  static IServiceClient getClient() {
     return client;
   }
 
