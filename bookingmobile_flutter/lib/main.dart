@@ -8,22 +8,18 @@ import 'bookings.dart';
 import 'dtos.dart';
 
 var baseUrl = "https://localhost:5001";
-
-var client = ClientFactory.create(baseUrl);
+var clientOptions = ClientOptions(baseUrl: baseUrl, ignoreCert: true);
+var client = ClientFactory.createWith(clientOptions);
 
 void main() {
   if (!kReleaseMode && !kIsWeb) {
-    HttpOverrides.global = MyHttpOverrides();
     if (Platform.isAndroid) {
-      baseUrl = "https://10.0.2.2:5001";
-    } else if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
-      baseUrl = "https://localhost:5001";
-    } else if (Platform.isIOS) {
-      baseUrl = "https://localhost:5001";
+      clientOptions.baseUrl = "https://10.0.2.2:5001";
+      clientOptions.ignoreCertificatesFor.add(clientOptions.baseUrl);
     }
   }
 
-  client = ClientFactory.create(baseUrl);
+  client = ClientFactory.createWith(clientOptions);
   client.post(Authenticate(
     provider: 'credentials',
     userName: 'admin@email.com',
@@ -209,15 +205,5 @@ class HelloFlutterState extends State<HelloFlutter> {
         child: const Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
-  }
-}
-
-/// Use only in debug to make it easy to access localhost API service.
-class MyHttpOverrides extends HttpOverrides {
-  @override
-  HttpClient createHttpClient(SecurityContext? context) {
-    return super.createHttpClient(context)
-      ..badCertificateCallback =
-          (X509Certificate cert, String host, int port) => true;
   }
 }
