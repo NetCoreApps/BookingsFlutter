@@ -28,6 +28,8 @@ class BookingFormState extends State<BookingForm> {
 
   BookingFormState({this.booking});
 
+  final IServiceClient client = BookingMobile.getClient();
+
   final Booking? booking;
   ResponseStatus? responseStatus;
 
@@ -95,8 +97,8 @@ class BookingFormState extends State<BookingForm> {
                 child: ReactiveTextField(
                     keyboardType: TextInputType.number,
                     formControlName: 'roomNumber',
-                    decoration: InputDecoration(
-                        label: const Text.rich(TextSpan(children: <InlineSpan>[
+                    decoration: const InputDecoration(
+                        label: Text.rich(TextSpan(children: <InlineSpan>[
                       WidgetSpan(child: Text('Room Number'))
                     ])))),
               ),
@@ -230,7 +232,7 @@ class BookingFormState extends State<BookingForm> {
 
   Future<IdResponse> createOrUpdateBooking() {
     if (booking == null) {
-      return BookingMobile.getClient().post(CreateBooking(
+      return client.post(CreateBooking(
           bookingStartDate: form.control('bookingStartDate').value,
           bookingEndDate: form.control('bookingEndDate').value,
           cost: form.control('cost').value,
@@ -238,7 +240,7 @@ class BookingFormState extends State<BookingForm> {
           roomNumber: form.control('roomNumber').value,
           roomType: form.control('roomType').value));
     } else {
-      return BookingMobile.getClient().put(UpdateBooking(
+      return client.put(UpdateBooking(
           id: booking?.id,
           bookingStartDate: form.control('bookingStartDate').value,
           bookingEndDate: form.control('bookingEndDate').value,

@@ -25,6 +25,8 @@ class TodoPage extends StatefulWidget {
 class TodoPageState extends State<TodoPage> {
   //State for this widget
 
+  final IServiceClient client = BookingMobile.getClient();
+
   @override
   void initState() {
     super.initState();
@@ -34,11 +36,11 @@ class TodoPageState extends State<TodoPage> {
   }
 
   Future<QueryResponse<Todo>> queryTodos() {
-    return BookingMobile.getClient().get(QueryTodos());
+    return client.get(QueryTodos());
   }
 
   Future<Todo> updateTodo(Todo item) {
-    return BookingMobile.getClient().put(UpdateTodo(
+    return client.put(UpdateTodo(
         id: item.id,
         isFinished: (item.isFinished ?? false) ? true : false,
         text: item.text));
@@ -51,13 +53,11 @@ class TodoPageState extends State<TodoPage> {
   }
 
   Future<void> deleteTodo(Todo item) {
-    return BookingMobile.getClient().delete(DeleteTodo(id: item.id));
+    return client.delete(DeleteTodo(id: item.id));
   }
 
   Future<Todo> createTodo(String text) {
-    return BookingMobile.getClient().post(CreateTodo(
-      text: text
-    ));
+    return client.post(CreateTodo(text: text));
   }
 
   List<Todo> todos = <Todo>[];
@@ -85,9 +85,9 @@ class TodoPageState extends State<TodoPage> {
                   ),
                   onSubmitted: (value) => {
                     createTodo(value).then((val) => {
-                      refreshTodos(),
-                      todoTextController.value = TextEditingValue.empty
-                    })
+                          setState(() => {todos.add(val)}),
+                          todoTextController.value = TextEditingValue.empty
+                        })
                   },
                   controller: todoTextController,
                 ),
@@ -99,13 +99,13 @@ class TodoPageState extends State<TodoPage> {
                   itemCount: todos.length,
                   itemBuilder: (BuildContext context, int index) {
                     return CheckboxListTile(
-                      dense: false,
+                        dense: false,
                         secondary: IconButton(
                             alignment: Alignment.centerRight,
                             onPressed: () => {
-                              deleteTodo(todos[index])
-                                  .then((val) => {refreshTodos()})
-                            },
+                                  deleteTodo(todos[index])
+                                      .then((val) => {refreshTodos()})
+                                },
                             icon: const Icon(Icons.delete)),
                         title: Row(
                           children: [
@@ -117,8 +117,8 @@ class TodoPageState extends State<TodoPage> {
                         ),
                         value: todos[index].isFinished ?? false,
                         controlAffinity: ListTileControlAffinity.leading,
-                        onChanged: (val) {
-                          todos[index].isFinished = val;
+                        onChanged: (checkboxVal) {
+                          todos[index].isFinished = checkboxVal;
                           updateTodo(todos[index]).then((val) => {
                                 setState(() {
                                   todos[index] = val;

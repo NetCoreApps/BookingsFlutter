@@ -1,7 +1,8 @@
 import 'package:bookingmobile_flutter/todo.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:servicestack/web_client.dart' if (dart.library.io) 'package:servicestack/client.dart';
+import 'package:servicestack/web_client.dart'
+    if (dart.library.io) 'package:servicestack/client.dart';
 import 'dart:io';
 
 import 'bookings.dart';
@@ -21,10 +22,9 @@ void main() {
 
   client = ClientFactory.createWith(clientOptions);
   client.post(Authenticate(
-    provider: 'credentials',
-    userName: 'admin@email.com',
-    password: 'p@55wOrd'
-  ));
+      provider: 'credentials',
+      userName: 'admin@email.com',
+      password: 'p@55wOrd'));
 
   runApp(const BookingMobile());
 }
@@ -36,9 +36,7 @@ class BookingMobile extends StatelessWidget {
     return client;
   }
 
-  static void authenticateClient() {
-
-  }
+  static void authenticateClient() {}
 
   // This widget is the root of your application.
   @override
@@ -122,8 +120,8 @@ class HelloFlutterState extends State<HelloFlutter> {
   Future<void> callService() {
     var text = myController.text.isEmpty ? "World" : myController.text;
     return client.get(Hello(name: text)).then((value) => setState(() {
-      result = value.result!;
-    }));
+          result = value.result!;
+        }));
   }
 
   @override
@@ -170,9 +168,7 @@ class HelloFlutterState extends State<HelloFlutter> {
                       padding: const EdgeInsets.all(8.0),
                       child: Text(
                         'Result: $result',
-                        style: const TextStyle(
-                            fontSize: 18
-                        ),
+                        style: const TextStyle(fontSize: 18),
                       ),
                     ),
                   ],

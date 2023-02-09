@@ -29,6 +29,8 @@ bool isSmall = false;
 class BookingsPageState extends State<BookingsPage> {
   //State for this widget
 
+  final IServiceClient client = BookingMobile.getClient();
+
   @override
   void initState() {
     super.initState();
@@ -38,11 +40,11 @@ class BookingsPageState extends State<BookingsPage> {
   }
 
   Future<QueryResponse<Booking>> queryBookings() {
-    return BookingMobile.getClient().get(QueryBookings());
+    return client.get(QueryBookings());
   }
 
   // Future<Booking> updateBooking(Booking item) {
-  //   return BookingMobile.getClient().put(UpdateBooking(
+  //   return client.put(UpdateBooking(
   //       id: item.id,
   //       bookingStartDate: );
   // }
@@ -54,7 +56,7 @@ class BookingsPageState extends State<BookingsPage> {
   }
 
   Future<void> deleteBooking(Booking item) {
-    return BookingMobile.getClient().delete(DeleteBooking(id: item.id));
+    return client.delete(DeleteBooking(id: item.id));
   }
 
   List<Booking> bookings = <Booking>[];
