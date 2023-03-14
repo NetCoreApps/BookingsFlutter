@@ -48,6 +48,7 @@ public enum RoomType
 public class QueryBookings : QueryDb<Booking> 
 {
     public int? Id { get; set; }
+    public string? OrderByDesc { get; set; }
 }
 
 // Uncomment below to enable DeletedBookings API to view deleted bookings:

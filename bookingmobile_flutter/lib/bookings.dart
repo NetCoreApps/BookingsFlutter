@@ -39,24 +39,17 @@ class BookingsPageState extends State<BookingsPage> {
     });
   }
 
-  Future<QueryResponse<Booking>> queryBookings() {
-    return client.get(QueryBookings());
+  Future<QueryResponse<Booking>> queryBookings() async {
+    return await client.get(QueryBookings());
   }
 
-  // Future<Booking> updateBooking(Booking item) {
-  //   return client.put(UpdateBooking(
-  //       id: item.id,
-  //       bookingStartDate: );
-  // }
-
-  Future<void> refreshBookings() {
-    return queryBookings().then((val) => {
-          setState(() => {bookings = val.results ?? <Booking>[]})
-        });
+  Future<void> refreshBookings() async {
+    var response = await queryBookings();
+    setState(() => {bookings = response.results ?? <Booking>[]});
   }
 
-  Future<void> deleteBooking(Booking item) {
-    return client.delete(DeleteBooking(id: item.id));
+  Future<void> deleteBooking(Booking item) async {
+    await client.delete(DeleteBooking(id: item.id));
   }
 
   List<Booking> bookings = <Booking>[];
@@ -74,11 +67,12 @@ class BookingsPageState extends State<BookingsPage> {
         TableCell(
           child: Padding(
             padding: const EdgeInsets.all(8.0),
-            child: IconButton(icon: const Icon(Icons.edit), onPressed: () => {
-              Navigator.push(
+            child: IconButton(icon: const Icon(Icons.edit), onPressed: () async {
+              await Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => BookingForm(booking: bookings[i],)),
-              ).then((value) => {refreshBookings()})
+              );
+              await refreshBookings();
             }),
           ),
         ),
@@ -98,11 +92,10 @@ class BookingsPageState extends State<BookingsPage> {
       tableRow.children?.add(TableCell(
         child: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: IconButton(icon: const Icon(Icons.delete), onPressed: () => {
+          child: IconButton(icon: const Icon(Icons.delete), onPressed: () async {
             // Delete HTTP call + update data
-            deleteBooking(bookings[i]).then((val) async => {
-              await refreshBookings()
-            })
+            await deleteBooking(bookings[i]);
+            await refreshBookings();
           }),
         ),
       ));
@@ -179,11 +172,12 @@ class BookingsPageState extends State<BookingsPage> {
       ),
       floatingActionButton: FloatingActionButton(
         heroTag: 'createbooking',
-        onPressed: () => {
-          Navigator.push(
+        onPressed: () async {
+          await Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const BookingForm()),
-          ).then((value) => {refreshBookings()})
+          );
+          await refreshBookings();
         },
         tooltip: 'Increment',
         child: const Icon(Icons.add),

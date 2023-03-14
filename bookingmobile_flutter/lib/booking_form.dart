@@ -22,7 +22,8 @@ class BookingFormState extends State<BookingForm> {
     'roomType': FormControl<RoomType>(validators: [Validators.required]),
     'roomNumber': FormControl<int>(validators: [Validators.required]),
     'cost': FormControl<double>(validators: [Validators.required]),
-    'bookingStartDate': FormControl<DateTime>(validators: [Validators.required]),
+    'bookingStartDate':
+        FormControl<DateTime>(validators: [Validators.required]),
     'bookingEndDate': FormControl<DateTime>()
   });
 
@@ -73,9 +74,9 @@ class BookingFormState extends State<BookingForm> {
                 padding: const EdgeInsets.all(8.0),
                 child: ReactiveTextField(
                   formControlName: 'name',
-                    validationMessages: {
-                      'required': (error) => 'The name must not be empty'
-                    },
+                  validationMessages: {
+                    'required': (error) => 'The name must not be empty'
+                  },
                   decoration: const InputDecoration(
                       label: Text.rich(TextSpan(children: <InlineSpan>[
                     WidgetSpan(child: Text('Name'))
@@ -203,32 +204,30 @@ class BookingFormState extends State<BookingForm> {
                         if (form.valid) {
                           createOrUpdateBooking()
                               .then((val) => {
-                            setState(() => {
-                              responseStatus = null
-                            }),
-                            Navigator.pop(context)
-                          })
+                                    setState(() => {responseStatus = null}),
+                                    Navigator.pop(context)
+                                  })
                               .catchError((error) => {
-                                setState(() => {
-                                  responseStatus = error.responseStatus
-                                })
-                          });
+                                    setState(() =>
+                                        {responseStatus = error.responseStatus})
+                                  });
                         }
                       },
                     ),
                   );
                 },
               ),
-              Text(responseStatus != null ? 'Error: ${responseStatus?.message}' : '',
-              style: const TextStyle(fontSize: 20,color: Colors.red))
+              Text(
+                  responseStatus != null
+                      ? 'Error: ${responseStatus?.message}'
+                      : '',
+                  style: const TextStyle(fontSize: 20, color: Colors.red))
             ],
           ));
         },
       ),
     );
   }
-
-
 
   Future<IdResponse> createOrUpdateBooking() {
     if (booking == null) {

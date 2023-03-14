@@ -30,13 +30,13 @@ class TodoPageState extends State<TodoPage> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      refreshTodos();
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
+      await refreshTodos();
     });
   }
 
-  Future<QueryResponse<Todo>> queryTodos() {
-    return client.get(QueryTodos());
+  Future<QueryResponse<Todo>> queryTodos() async {
+    return await client.get(QueryTodos());
   }
 
   Future<Todo> updateTodo(Todo item) {
@@ -46,18 +46,19 @@ class TodoPageState extends State<TodoPage> {
         text: item.text));
   }
 
-  Future<void> refreshTodos() {
-    return queryTodos().then((val) => {
-          setState(() => {todos = val.results ?? <Todo>[]})
-        });
+  Future<void> refreshTodos() async {
+    var response = await queryTodos();
+    setState(() => {
+      todos = response.results ?? <Todo>[]
+    });
   }
 
-  Future<void> deleteTodo(Todo item) {
-    return client.delete(DeleteTodo(id: item.id));
+  Future<void> deleteTodo(Todo item) async {
+    await client.delete(DeleteTodo(id: item.id));
   }
 
-  Future<Todo> createTodo(String text) {
-    return client.post(CreateTodo(text: text));
+  Future<Todo> createTodo(String text) async {
+    return await client.post(CreateTodo(text: text));
   }
 
   List<Todo> todos = <Todo>[];
@@ -83,11 +84,10 @@ class TodoPageState extends State<TodoPage> {
                     border: OutlineInputBorder(),
                     hintText: 'What needs to be done?',
                   ),
-                  onSubmitted: (value) => {
-                    createTodo(value).then((val) => {
-                          setState(() => {todos.add(val)}),
-                          todoTextController.value = TextEditingValue.empty
-                        })
+                  onSubmitted: (value) async {
+                    var response = await createTodo(value);
+                    setState(() => {todos.add(response)});
+                    todoTextController.value = TextEditingValue.empty;
                   },
                   controller: todoTextController,
                 ),
@@ -102,9 +102,9 @@ class TodoPageState extends State<TodoPage> {
                         dense: false,
                         secondary: IconButton(
                             alignment: Alignment.centerRight,
-                            onPressed: () => {
-                                  deleteTodo(todos[index])
-                                      .then((val) => {refreshTodos()})
+                            onPressed: () async {
+                                  await deleteTodo(todos[index]);
+                                  await refreshTodos();
                                 },
                             icon: const Icon(Icons.delete)),
                         title: Row(
@@ -117,13 +117,12 @@ class TodoPageState extends State<TodoPage> {
                         ),
                         value: todos[index].isFinished ?? false,
                         controlAffinity: ListTileControlAffinity.leading,
-                        onChanged: (checkboxVal) {
+                        onChanged: (checkboxVal) async {
                           todos[index].isFinished = checkboxVal;
-                          updateTodo(todos[index]).then((val) => {
-                                setState(() {
-                                  todos[index] = val;
-                                })
-                              });
+                          var response = await updateTodo(todos[index]);
+                          setState(() {
+                            todos[index] = response;
+                          });
                         });
                   })
             ],
